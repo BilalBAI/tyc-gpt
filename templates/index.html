@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TYC – Islamic Finance Advisor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TYC – Islamic Finance Advisor</h1>
+            <p class="subtitle">Your trusted guide to Islamic finance and Sharia compliance</p>
+        </header>
+
+        <main>
+            <div class="chat-container">
+                <div id="chat-history" class="chat-history">
+                    <div class="welcome-message">
+                        <p>Welcome! I'm your Islamic Finance Advisor. Ask me anything about:</p>
+                        <ul>
+                            <li>Sharia compliance of financial products</li>
+                            <li>Islamic finance principles and concepts</li>
+                            <li>AAOIFI standards and practices</li>
+                            <li>Sukuk and other Islamic financial instruments</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <form id="question-form">
+                        <textarea 
+                            id="question-input" 
+                            placeholder="Ask your question about Islamic finance..."
+                            rows="3"
+                            required
+                        ></textarea>
+                        <button type="submit" id="submit-btn">
+                            <span>Ask</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by TYC Finance Limited | Established in Hong Kong, 2021</p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('question-form');
+        const input = document.getElementById('question-input');
+        const chatHistory = document.getElementById('chat-history');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const question = input.value.trim();
+            if (!question) return;
+
+            // Disable form
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Thinking...</span>';
+
+            // Add user question to chat
+            addMessage(question, 'user');
+
+            // Clear input
+            input.value = '';
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    addMessage(data.answer, 'assistant');
+                } else {
+                    addMessage('Sorry, I encountered an error: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                addMessage('Sorry, I encountered an error. Please try again.', 'error');
+            } finally {
+                // Re-enable form
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Ask</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+            }
+        });
+
+        function addMessage(content, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            if (role === 'user') {
+                messageDiv.innerHTML = `<div class="message-content"><strong>You:</strong><p>${escapeHtml(content)}</p></div>`;
+            } else if (role === 'assistant') {
+                messageDiv.innerHTML = `<div class="message-content"><strong>TYC Advisor:</strong><div class="answer-content">${formatAnswer(content)}</div></div>`;
+            } else {
+                messageDiv.innerHTML = `<div class="message-content error"><p>${escapeHtml(content)}</p></div>`;
+            }
+            
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatAnswer(text) {
+            // Convert markdown-style formatting to HTML
+            let html = escapeHtml(text);
+            
+            // Convert **bold** to <strong>
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Convert line breaks to <br>
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = html.replace(/\n/g, '<br>');
+            
+            // Wrap in paragraphs
+            if (!html.startsWith('<p>')) {
+                html = '<p>' + html + '</p>';
+            }
+            
+            return html;
+        }
+    </script>
+</body>
+</html>
+
