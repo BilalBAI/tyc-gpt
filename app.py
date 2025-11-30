@@ -24,8 +24,10 @@ def ask():
             return jsonify({'error': 'Please provide a question'}), 400
         
         # Get the answer from the advisor
-        # PDF context is enabled by default but will gracefully fail if unavailable
-        answer = advisor.ask(question, use_pdf_context=True)
+        # PDF context disabled by default on Render due to memory constraints
+        # Set ENABLE_PDF_KNOWLEDGE=true to enable (not recommended on free tier)
+        use_pdf = os.getenv('ENABLE_PDF_KNOWLEDGE', 'false').lower() == 'true'
+        answer = advisor.ask(question, use_pdf_context=use_pdf)
         
         return jsonify({
             'question': question,
