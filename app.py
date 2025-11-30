@@ -24,14 +24,17 @@ def ask():
             return jsonify({'error': 'Please provide a question'}), 400
         
         # Get the answer from the advisor
-        answer = advisor.ask(question)
+        # PDF context is enabled by default but will gracefully fail if unavailable
+        answer = advisor.ask(question, use_pdf_context=True)
         
         return jsonify({
             'question': question,
             'answer': answer
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Log error but return user-friendly message
+        print(f"Error in /ask endpoint: {e}")
+        return jsonify({'error': 'An error occurred while processing your question. Please try again.'}), 500
 
 if __name__ == '__main__':
     # Get port from environment variable (for cloud deployment) or default to 5000

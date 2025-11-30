@@ -99,7 +99,7 @@ class TYCIslamicFinanceAdvisor:
         if use_pdf_context and PDF_AVAILABLE:
             try:
                 pdf_context = get_aaoifi_context(user_message, max_chars=2000)
-                if pdf_context:
+                if pdf_context and pdf_context.strip():
                     enhanced_message = f"""{user_message}
 
 ---
@@ -108,8 +108,8 @@ Relevant context from AAOIFI Standards:
 ---
 Please use the above AAOIFI Standards context to inform your answer when relevant."""
             except Exception as e:
-                print(f"Warning: Could not load PDF context: {e}")
-                # Continue without PDF context
+                # Silently continue without PDF context - app should work without it
+                pass
 
         messages = [{"role": "system", "content": TYC_SYSTEM_PROMPT}]
 

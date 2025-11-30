@@ -2,11 +2,15 @@
 PDF Knowledge Base for AAOIFI Standards
 
 This module extracts and provides searchable access to the AAOIFI Standards PDF.
+Can be disabled via ENABLE_PDF_KNOWLEDGE environment variable (set to 'false' to disable).
 """
 
 import os
 from typing import List, Dict, Optional
 import re
+
+# Check if PDF knowledge base is enabled (default: True)
+PDF_ENABLED = os.getenv('ENABLE_PDF_KNOWLEDGE', 'true').lower() != 'false'
 
 
 class PDFKnowledgeBase:
@@ -43,17 +47,30 @@ class PDFKnowledgeBase:
         import PyPDF2
 
         text_content = []
-        with open(self.pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            for page_num, page in enumerate(pdf_reader.pages):
-                try:
-                    text = page.extract_text()
-                    if text.strip():
-                        text_content.append(
-                            f"--- Page {page_num + 1} ---\n{text}")
-                except Exception as e:
-                    print(
-                        f"Warning: Could not extract text from page {page_num + 1}: {e}")
+        max_pages = 100  # Limit pages to prevent memory issues
+        
+        try:
+            with open(self.pdf_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                total_pages = len(pdf_reader.pages)
+                pages_to_process = min(total_pages, max_pages)
+                
+                for page_num in range(pages_to_process):
+                    try:
+                        page = pdf_reader.pages[page_num]
+                        text = page.extract_text()
+                        if text and text.strip():
+                            text_content.append(
+                                f"--- Page {page_num + 1} ---\n{text}")
+                    except Exception as e:
+                        print(
+                            f"Warning: Could not extract text from page {page_num + 1}: {e}")
+                        continue
+                
+                if pages_to_process < total_pages:
+                    print(f"Warning: Processed only first {pages_to_process} of {total_pages} pages to save memory")
+        except Exception as e:
+            raise Exception(f"Failed to load PDF: {e}")
 
         return "\n\n".join(text_content)
 
@@ -62,16 +79,29 @@ class PDFKnowledgeBase:
         import pdfplumber
 
         text_content = []
-        with pdfplumber.open(self.pdf_path) as pdf:
-            for page_num, page in enumerate(pdf.pages):
-                try:
-                    text = page.extract_text()
-                    if text and text.strip():
-                        text_content.append(
-                            f"--- Page {page_num + 1} ---\n{text}")
-                except Exception as e:
-                    print(
-                        f"Warning: Could not extract text from page {page_num + 1}: {e}")
+        max_pages = 100  # Limit pages to prevent memory issues
+        
+        try:
+            with pdfplumber.open(self.pdf_path) as pdf:
+                total_pages = len(pdf.pages)
+                pages_to_process = min(total_pages, max_pages)
+                
+                for page_num in range(pages_to_process):
+                    try:
+                        page = pdf.pages[page_num]
+                        text = page.extract_text()
+                        if text and text.strip():
+                            text_content.append(
+                                f"--- Page {page_num + 1} ---\n{text}")
+                    except Exception as e:
+                        print(
+                            f"Warning: Could not extract text from page {page_num + 1}: {e}")
+                        continue
+                
+                if pages_to_process < total_pages:
+                    print(f"Warning: Processed only first {pages_to_process} of {total_pages} pages to save memory")
+        except Exception as e:
+            raise Exception(f"Failed to load PDF with pdfplumber: {e}")
 
         return "\n\n".join(text_content)
 
@@ -105,9 +135,18 @@ class PDFKnowledgeBase:
         :return: List of dictionaries with 'text' and 'page' info
         """
         if self.content is None:
-            print("Loading PDF content...")
-            self.content = self.load_pdf()
-            self.chunks = self.chunk_text(self.content)
+            try:
+                print("Loading PDF content...")
+                self.content = self.load_pdf()
+                if not self.content:
+                    print("Warning: PDF content is empty")
+                    return []
+                self.chunks = self.chunk_text(self.content)
+            except Exception as e:
+                print(f"Error loading PDF: {e}")
+                self.content = ""  # Mark as attempted to prevent retries
+                self.chunks = []
+                return []
 
         query_lower = query.lower()
         query_terms = query_lower.split()
@@ -181,10 +220,19 @@ def get_knowledge_base() -> PDFKnowledgeBase:
 def get_aaoifi_context(query: str, max_chars: int = 2000) -> str:
     """
     Convenience function to get AAOIFI context for a query.
+    Returns empty string if PDF cannot be loaded (graceful failure).
 
     :param query: The user's question
     :param max_chars: Maximum characters to return
-    :return: Formatted context string
+    :return: Formatted context string (empty if PDF unavailable)
     """
-    kb = get_knowledge_base()
-    return kb.get_relevant_context(query, max_chars)
+    # Check if PDF is disabled via environment variable
+    if not PDF_ENABLED:
+        return ""
+    
+    try:
+        kb = get_knowledge_base()
+        return kb.get_relevant_context(query, max_chars)
+    except Exception as e:
+        print(f"Warning: Could not get AAOIFI context: {e}")
+        return ""  # Return empty string to allow app to continue without PDF
