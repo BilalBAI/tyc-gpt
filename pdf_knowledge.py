@@ -15,18 +15,42 @@ PDF_ENABLED = os.getenv('ENABLE_PDF_KNOWLEDGE', 'true').lower() != 'false'
 
 class PDFKnowledgeBase:
     """
-    A simple knowledge base for searching PDF content.
-    For production, consider using vector embeddings (e.g., with OpenAI embeddings).
+    A simple knowledge base for searching AAOIFI Standards content.
+    Reads from text file if available (faster), otherwise falls back to PDF parsing.
     """
 
-    def __init__(self, pdf_path: str = "AAOIFI-Standards.pdf"):
+    def __init__(self, pdf_path: str = "AAOIFI-Standards.pdf", 
+                 text_path: str = "AAOIFI-Standards.txt"):
         self.pdf_path = pdf_path
+        self.text_path = text_path
         self.content = None
         self.chunks = []
 
+    def load_content(self) -> str:
+        """
+        Load content from text file (preferred) or PDF (fallback).
+        Returns the full text content.
+        """
+        # Try text file first (much faster and no memory issues)
+        if os.path.exists(self.text_path):
+            try:
+                print(f"Loading from text file: {self.text_path}")
+                with open(self.text_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                if content.strip():
+                    return content
+                else:
+                    print("Text file is empty, falling back to PDF...")
+            except Exception as e:
+                print(f"Error reading text file: {e}, falling back to PDF...")
+        
+        # Fallback to PDF parsing
+        print(f"Loading from PDF: {self.pdf_path}")
+        return self.load_pdf()
+    
     def load_pdf(self) -> str:
         """
-        Extract text from the PDF file.
+        Extract text from the PDF file (fallback method).
         Returns the full text content.
         """
         try:
@@ -69,12 +93,14 @@ class PDFKnowledgeBase:
                                 failure_count = 0  # Reset on success
                         except (MemoryError, SystemExit) as e:
                             # Critical memory/system errors - stop immediately
-                            print(f"Critical error extracting page {page_num + 1}: {e}")
+                            print(
+                                f"Critical error extracting page {page_num + 1}: {e}")
                             raise
                         except Exception as e:
                             failure_count += 1
                             if failure_count >= max_failures:
-                                print(f"Too many extraction failures ({failure_count}), stopping")
+                                print(
+                                    f"Too many extraction failures ({failure_count}), stopping")
                                 break
                             continue
                     except (MemoryError, SystemExit) as e:
@@ -83,7 +109,8 @@ class PDFKnowledgeBase:
                     except Exception as e:
                         failure_count += 1
                         if failure_count >= max_failures:
-                            print(f"Too many page failures ({failure_count}), stopping")
+                            print(
+                                f"Too many page failures ({failure_count}), stopping")
                             break
                         continue
 
@@ -98,7 +125,7 @@ class PDFKnowledgeBase:
 
         if not text_content:
             raise Exception("No text could be extracted from PDF")
-        
+
         return "\n\n".join(text_content)
 
     def _extract_with_pdfplumber(self) -> str:
@@ -127,12 +154,14 @@ class PDFKnowledgeBase:
                                 failure_count = 0  # Reset on success
                         except (MemoryError, SystemExit) as e:
                             # Critical memory/system errors - stop immediately
-                            print(f"Critical error extracting page {page_num + 1}: {e}")
+                            print(
+                                f"Critical error extracting page {page_num + 1}: {e}")
                             raise
                         except Exception as e:
                             failure_count += 1
                             if failure_count >= max_failures:
-                                print(f"Too many extraction failures ({failure_count}), stopping")
+                                print(
+                                    f"Too many extraction failures ({failure_count}), stopping")
                                 break
                             continue
                     except (MemoryError, SystemExit) as e:
@@ -141,7 +170,8 @@ class PDFKnowledgeBase:
                     except Exception as e:
                         failure_count += 1
                         if failure_count >= max_failures:
-                            print(f"Too many page failures ({failure_count}), stopping")
+                            print(
+                                f"Too many page failures ({failure_count}), stopping")
                             break
                         continue
 
@@ -156,7 +186,7 @@ class PDFKnowledgeBase:
 
         if not text_content:
             raise Exception("No text could be extracted from PDF")
-        
+
         return "\n\n".join(text_content)
 
     def chunk_text(self, text: str, chunk_size: int = 1000, overlap: int = 200) -> List[str]:
@@ -190,10 +220,10 @@ class PDFKnowledgeBase:
         """
         if self.content is None:
             try:
-                print("Loading PDF content...")
-                self.content = self.load_pdf()
+                print("Loading AAOIFI Standards content...")
+                self.content = self.load_content()  # Uses text file if available
                 if not self.content:
-                    print("Warning: PDF content is empty")
+                    print("Warning: Content is empty")
                     self.content = ""  # Mark as attempted
                     self.chunks = []
                     return []

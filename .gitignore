@@ -12,4 +12,6 @@ ENV/
 .DS_Store
 instance/
 .webassets-cache
+# Text file can be committed (much smaller than PDF)
+# AAOIFI-Standards.txt
 
