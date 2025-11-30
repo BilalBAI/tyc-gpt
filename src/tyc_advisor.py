@@ -125,12 +125,16 @@ Please use the above AAOIFI Standards context to inform your answer when relevan
 
         messages.append({"role": "user", "content": enhanced_message})
 
-        # Build request parameters, only including max_tokens if provided
+        # Build request parameters
         request_params = {
             "model": self.model,
             "messages": messages,
-            "temperature": temperature,
         }
+        
+        # gpt-5-mini only supports temperature=1 (default), so don't set it for that model
+        if self.model != "gpt-5-mini":
+            request_params["temperature"] = temperature
+        
         if max_tokens is not None:
             request_params["max_tokens"] = max_tokens
 
