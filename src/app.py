@@ -20,8 +20,8 @@ def ask():
     try:
         data = request.get_json()
         question = data.get('question', '').strip()
-        # Default to gpt-5-mini
-        model = data.get('model', 'gpt-5-mini')
+        # Default to gpt-5.1
+        model = data.get('model', 'gpt-5.1')
 
         if not question:
             return jsonify({'error': 'Please provide a question'}), 400
@@ -29,7 +29,7 @@ def ask():
         # Validate model
         valid_models = ['gpt-5.1', 'gpt-5-mini']
         if model not in valid_models:
-            model = 'gpt-5-mini'  # Fallback to default
+            model = 'gpt-5.1'  # Fallback to default
 
         # Create advisor with selected model
         advisor = TYCIslamicFinanceAdvisor(model=model)

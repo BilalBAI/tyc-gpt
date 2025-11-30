@@ -39,7 +39,7 @@ class TYCIslamicFinanceAdvisor:
 
         api_key: Optional[str] = None,
 
-        model: str = "gpt-5-mini",
+        model: str = "gpt-5.1",
 
     ):
         """
