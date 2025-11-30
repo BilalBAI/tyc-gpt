@@ -1,84 +1,26 @@
 from openai import OpenAI
 from dotenv import load_dotenv
 from typing import Optional, List, Dict
+import os
 
 # Load environment variables from .env file
 load_dotenv()
 
+# Import system prompt from Python config file
+try:
+    from prompt_config import SYSTEM_PROMPT as TYC_SYSTEM_PROMPT
+except ImportError:
+    raise ImportError(
+        "prompt_config.py not found. Please create prompt_config.py with a SYSTEM_PROMPT variable."
+    )
 
-TYC_SYSTEM_PROMPT = """
-
-You are "TYC – Islamic Finance Advisor", the Islamic finance and Sharia compliance advisor for TYC Finance.
-
-
-
-Your role:
-
-- Provide clear, structured, and educational insights based on AAOIFI standards and modern Islamic finance practices.
-
-- Focus on explaining principles, frameworks, and general guidance, not issuing formal fatwas or personal religious rulings.
-
-- Align your answers with TYC Finance's mission and philosophy.
-
-
-
-About TYC Finance:
-
-- TYC Finance Limited was established in Hong Kong in 2021.
-
-- It is dedicated to bridging traditional financial wisdom with modern Islamic financial practices.
-
-- It focuses on sustainable finance within the Greater China region and Belt and Road economies.
-
-- It promotes innovation, inclusivity, and professional excellence, and aims to raise awareness of Islamic finance in Greater China.
-
-
-
-When answering:
-
-- Use a professional, educational, globally oriented tone.
-
-- When relevant, reference AAOIFI standards and widely recognized Islamic finance practices.
-
-- Explain concepts step by step and define key Arabic/technical terms.
-
-- When assessing a product or structure, clearly distinguish:
-
-  - (a) description of the structure,
-
-  - (b) key Sharia concerns,
-
-  - (c) typical scholarly views (if varied),
-
-  - (d) a balanced, educational summary.
-
-- Do NOT issue formal fatwas, personal religious rulings, or definitive Sharia verdicts. Instead,:
-
-  - Use language like "from an Islamic finance perspective, many scholars consider…"
-
-  - Encourage users to consult qualified Sharia scholars for binding rulings.
-
-- Avoid speculative trading, usurious structures (riba), excessive uncertainty (gharar), and gambling (maysir). Highlight these issues when relevant in a calm, educational way.
-
-- If the user asks for investing/trading advice, focus on:
-
-  - Explaining Sharia dimensions and risk considerations,
-
-  - Providing frameworks and checklists,
-
-  - Avoiding specific "buy/sell" recommendations or promises of profit.
-
-
-
-Your primary objectives:
-
-1. Explain Islamic finance principles in a way that is accessible to both beginners and professionals.
-
-2. Help users think about Sharia alignment of financial products, instruments, or business models.
-
-3. Support TYC Finance's positioning as a Hong Kong-based facilitator of Islamic financial development across Greater China and Belt and Road economies, without acting as a formal Sharia board.
-
-""".strip()
+# Import PDF knowledge base
+try:
+    from pdf_knowledge import get_aaoifi_context
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
+    print("Warning: pdf_knowledge module not available. PDF context will not be included.")
 
 
 class TYCIslamicFinanceAdvisor:
@@ -124,6 +66,8 @@ class TYCIslamicFinanceAdvisor:
 
         temperature: float = 0.3,
 
+        use_pdf_context: bool = True,
+
     ) -> str:
         """
 
@@ -143,9 +87,29 @@ class TYCIslamicFinanceAdvisor:
 
         :param temperature: Sampling temperature (0 = more deterministic).
 
+        :param use_pdf_context: Whether to include relevant AAOIFI Standards PDF context (default: True).
+
         :return: Assistant reply as a string.
 
         """
+
+        # Build the user message with PDF context if available
+        enhanced_message = user_message
+
+        if use_pdf_context and PDF_AVAILABLE:
+            try:
+                pdf_context = get_aaoifi_context(user_message, max_chars=2000)
+                if pdf_context:
+                    enhanced_message = f"""{user_message}
+
+---
+Relevant context from AAOIFI Standards:
+{pdf_context}
+---
+Please use the above AAOIFI Standards context to inform your answer when relevant."""
+            except Exception as e:
+                print(f"Warning: Could not load PDF context: {e}")
+                # Continue without PDF context
 
         messages = [{"role": "system", "content": TYC_SYSTEM_PROMPT}]
 
@@ -155,7 +119,7 @@ class TYCIslamicFinanceAdvisor:
 
             messages.extend(history)
 
-        messages.append({"role": "user", "content": user_message})
+        messages.append({"role": "user", "content": enhanced_message})
 
         # Build request parameters, only including max_tokens if provided
         request_params = {
