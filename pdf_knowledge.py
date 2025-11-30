@@ -19,7 +19,7 @@ class PDFKnowledgeBase:
     Reads from text file if available (faster), otherwise falls back to PDF parsing.
     """
 
-    def __init__(self, pdf_path: str = "AAOIFI-Standards.pdf", 
+    def __init__(self, pdf_path: str = "AAOIFI-Standards.pdf",
                  text_path: str = "AAOIFI-Standards.txt"):
         self.pdf_path = pdf_path
         self.text_path = text_path
@@ -43,11 +43,11 @@ class PDFKnowledgeBase:
                     print("Text file is empty, falling back to PDF...")
             except Exception as e:
                 print(f"Error reading text file: {e}, falling back to PDF...")
-        
+
         # Fallback to PDF parsing
         print(f"Loading from PDF: {self.pdf_path}")
         return self.load_pdf()
-    
+
     def load_pdf(self) -> str:
         """
         Extract text from the PDF file (fallback method).
