@@ -6,8 +6,13 @@ Can be disabled via ENABLE_PDF_KNOWLEDGE environment variable (set to 'false' to
 """
 
 import os
+import sys
 from typing import List, Dict, Optional
+from pathlib import Path
 import re
+
+# Get project root directory (parent of src/)
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 # Check if PDF knowledge base is enabled (default: True)
 PDF_ENABLED = os.getenv('ENABLE_PDF_KNOWLEDGE', 'true').lower() != 'false'
@@ -19,8 +24,13 @@ class PDFKnowledgeBase:
     Reads from text file if available (faster), otherwise falls back to PDF parsing.
     """
 
-    def __init__(self, pdf_path: str = "AAOIFI-Standards.pdf",
-                 text_path: str = "AAOIFI-Standards.txt"):
+    def __init__(self, pdf_path: Optional[str] = None, 
+                 text_path: Optional[str] = None):
+        # Use project root for data files
+        if pdf_path is None:
+            pdf_path = str(PROJECT_ROOT / "data" / "AAOIFI-Standards.pdf")
+        if text_path is None:
+            text_path = str(PROJECT_ROOT / "data" / "AAOIFI-Standards.txt")
         self.pdf_path = pdf_path
         self.text_path = text_path
         self.content = None
@@ -32,10 +42,11 @@ class PDFKnowledgeBase:
         Returns the full text content.
         """
         # Try text file first (much faster and no memory issues)
-        if os.path.exists(self.text_path):
+        text_path = Path(self.text_path)
+        if text_path.exists():
             try:
-                print(f"Loading from text file: {self.text_path}")
-                with open(self.text_path, 'r', encoding='utf-8') as f:
+                print(f"Loading from text file: {text_path}")
+                with open(text_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                 if content.strip():
                     return content
@@ -45,7 +56,8 @@ class PDFKnowledgeBase:
                 print(f"Error reading text file: {e}, falling back to PDF...")
 
         # Fallback to PDF parsing
-        print(f"Loading from PDF: {self.pdf_path}")
+        pdf_path = Path(self.pdf_path)
+        print(f"Loading from PDF: {pdf_path}")
         return self.load_pdf()
 
     def load_pdf(self) -> str:
@@ -73,8 +85,9 @@ class PDFKnowledgeBase:
         text_content = []
         max_pages = 50  # Reduced to prevent memory issues
 
+        pdf_path = Path(self.pdf_path)
         try:
-            with open(self.pdf_path, 'rb') as file:
+            with open(pdf_path, 'rb') as file:
                 pdf_reader = PyPDF2.PdfReader(file)
                 total_pages = len(pdf_reader.pages)
                 pages_to_process = min(total_pages, max_pages)
@@ -135,8 +148,9 @@ class PDFKnowledgeBase:
         text_content = []
         max_pages = 50  # Reduced to prevent memory issues
 
+        pdf_path = Path(self.pdf_path)
         try:
-            with pdfplumber.open(self.pdf_path) as pdf:
+            with pdfplumber.open(pdf_path) as pdf:
                 total_pages = len(pdf.pages)
                 pages_to_process = min(total_pages, max_pages)
 

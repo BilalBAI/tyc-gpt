@@ -1,75 +1,112 @@
-# TYC Islamic Finance Advisor Web Application
+# TYC Islamic Finance Advisor
 
-A beautiful web interface for the TYC Islamic Finance Advisor, powered by OpenAI.
+A web application providing AI-powered Islamic finance and Sharia compliance advisory services, powered by OpenAI and AAOIFI Standards.
 
-## Features
+## 📁 Project Structure
 
-- Modern, responsive web interface
-- Real-time chat with the Islamic Finance Advisor
-- Educational insights based on AAOIFI standards
-- Sharia compliance guidance
+```
+tyc-gpt/
+├── src/                    # Main application code
+│   ├── app.py             # Flask web application
+│   ├── tyc_advisor.py     # Core advisor class
+│   ├── pdf_knowledge.py   # AAOIFI Standards knowledge base
+│   ├── prompt_config.py   # System prompt configuration
+│   ├── templates/         # HTML templates
+│   └── static/            # CSS and static assets
+├── data/                   # Data files
+│   ├── AAOIFI-Standards.pdf
+│   └── AAOIFI-Standards.txt
+├── scripts/                # Utility scripts
+│   ├── convert_pdf_to_text.py
+│   └── ...
+├── docs/                   # Documentation
+│   ├── DEPLOY.md
+│   └── ...
+├── requirements.txt        # Python dependencies
+├── Procfile               # Deployment configuration
+└── README.md              # This file
+```
 
-## Setup
+## 🚀 Quick Start
 
-1. Install dependencies:
+### Local Development
+
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Set up environment variables:**
+   Create a `.env` file in the root directory:
+   ```
+   OPENAI_API_KEY=your_api_key_here
+   ```
+
+3. **Run the application:**
+   ```bash
+   python src/app.py
+   ```
+
+4. **Access the application:**
+   - Local: http://localhost:5000
+   - Network: http://YOUR_IP:5000
+
+## 📚 Features
+
+- **AI-Powered Advisor**: Answers questions about Islamic finance and Sharia compliance
+- **AAOIFI Standards Integration**: References official AAOIFI Standards when relevant
+- **Modern Web Interface**: Beautiful, responsive chat interface
+- **Educational Focus**: Provides clear, structured explanations suitable for beginners and professionals
+
+## 🔧 Configuration
+
+### System Prompt
+Edit `src/prompt_config.py` to modify the advisor's behavior and knowledge base.
+
+### PDF Knowledge Base
+The application uses a text file (`data/AAOIFI-Standards.txt`) for fast access to AAOIFI Standards. To regenerate:
 ```bash
-pip install -r requirements.txt
+python scripts/convert_pdf_to_text.py
 ```
 
-2. Make sure your `.env` file contains your OpenAI API key:
-```
-OPENAI_API_KEY=your_api_key_here
-```
+### Environment Variables
+- `OPENAI_API_KEY`: Your OpenAI API key (required)
+- `ENABLE_PDF_KNOWLEDGE`: Set to `'true'` to enable PDF context (default: `'false'`)
 
-## Running the Application
+## 📦 Deployment
 
-1. Start the Flask server:
+See [docs/DEPLOY.md](docs/DEPLOY.md) for detailed deployment instructions to Render, Railway, or other platforms.
+
+### Quick Deploy to Render
+
+1. Push code to GitHub
+2. Create new Web Service on Render
+3. Set build command: `pip install -r requirements.txt`
+4. Set start command: `gunicorn src.app:app`
+5. Add environment variable: `OPENAI_API_KEY`
+
+## 📖 Documentation
+
+- [Deployment Guide](docs/DEPLOY.md)
+- [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md)
+- [PDF Conversion Guide](docs/README_PDF_CONVERSION.md)
+
+## 🛠️ Development
+
+### Running Tests
 ```bash
-python app.py
+python -c "from src.app import app; print('App loads successfully')"
 ```
 
-2. Open your browser and navigate to:
-   - **Local access**: http://localhost:5000
-   - **Network access**: http://YOUR_IP_ADDRESS:5000
+### Converting PDF
+```bash
+python scripts/convert_pdf_to_text.py
+```
 
-## Deployment for Wide Sharing
+## 📝 License
 
-**For deploying to the cloud and sharing with anyone, anywhere, see [DEPLOY.md](DEPLOY.md) for detailed instructions.**
+Copyright © 2021 TYC Finance Limited. All rights reserved.
 
-### Quick Deploy Options:
+## 🤝 Support
 
-1. **Render** (Recommended - Free tier): See DEPLOY.md for step-by-step guide
-2. **Railway**: Easy deployment with GitHub integration
-3. **Fly.io**: Good free tier with global CDN
-4. **ngrok** (Quick test): Temporary tunnel for testing
-
-### Local Network Sharing
-
-If you just want to share on your local network:
-1. Find your computer's IP address:
-   - **Mac/Linux**: Run `ifconfig` or `ipconfig getifaddr en0`
-   - **Windows**: Run `ipconfig` and look for IPv4 Address
-2. Share the link: `http://YOUR_IP_ADDRESS:5000`
-3. Make sure your friends are on the same WiFi network
-4. Ensure your firewall allows connections on port 5000
-
-## Usage
-
-1. Type your question about Islamic finance in the input box
-2. Click "Ask" or press Enter
-3. The advisor will provide a comprehensive, educational response
-4. Continue the conversation by asking follow-up questions
-
-## Example Questions
-
-- "Can you explain whether a conventional fixed-rate bond is Sharia-compliant?"
-- "What is the difference between sukuk and conventional bonds?"
-- "How does murabaha work in Islamic finance?"
-- "What are the key principles of Islamic banking?"
-
-## Notes
-
-- The application runs on port 5000 by default
-- For production use, consider using a production WSGI server like Gunicorn
-- Make sure to keep your `.env` file secure and never commit it to version control
-
+For issues or questions, please refer to the documentation in the `docs/` folder.

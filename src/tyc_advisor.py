@@ -8,15 +8,15 @@ load_dotenv()
 
 # Import system prompt from Python config file
 try:
-    from prompt_config import SYSTEM_PROMPT as TYC_SYSTEM_PROMPT
+    from src.prompt_config import SYSTEM_PROMPT as TYC_SYSTEM_PROMPT
 except ImportError:
     raise ImportError(
-        "prompt_config.py not found. Please create prompt_config.py with a SYSTEM_PROMPT variable."
+        "prompt_config.py not found. Please create src/prompt_config.py with a SYSTEM_PROMPT variable."
     )
 
 # Import PDF knowledge base
 try:
-    from pdf_knowledge import get_aaoifi_context
+    from src.pdf_knowledge import get_aaoifi_context
     PDF_AVAILABLE = True
 except ImportError:
     PDF_AVAILABLE = False

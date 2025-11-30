@@ -9,8 +9,8 @@ import os
 from typing import Optional
 
 
-def convert_pdf_to_text(pdf_path: str = "AAOIFI-Standards.pdf", 
-                        output_path: str = "AAOIFI-Standards.txt",
+def convert_pdf_to_text(pdf_path: str = "data/AAOIFI-Standards.pdf", 
+                        output_path: str = "data/AAOIFI-Standards.txt",
                         max_pages: Optional[int] = None):
     """
     Convert PDF to text file.

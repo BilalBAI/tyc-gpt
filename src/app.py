@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-from tyc_advisor import TYCIslamicFinanceAdvisor
+from src.tyc_advisor import TYCIslamicFinanceAdvisor
 import os
 
 app = Flask(__name__)
