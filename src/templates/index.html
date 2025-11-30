@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TYC – Islamic Finance Advisor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -34,16 +36,13 @@
                                 <option value="gpt-5-mini" selected>GPT-5 Mini (Fast)</option>
                                 <option value="gpt-5.1">GPT-5.1 (Standard)</option>
                             </select>
-                            <textarea 
-                                id="question-input" 
-                                placeholder="Ask your question about Islamic finance..."
-                                rows="3"
-                                required
-                            ></textarea>
+                            <textarea id="question-input" placeholder="Ask your question about Islamic finance..."
+                                rows="3" required></textarea>
                         </div>
                         <button type="submit" id="submit-btn">
                             <span>Ask</span>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <line x1="22" y1="2" x2="11" y2="13"></line>
                                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                             </svg>
@@ -66,7 +65,7 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const question = input.value.trim();
             if (!question) return;
 
@@ -90,7 +89,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         question: question,
                         model: selectedModel
                     })
@@ -115,7 +114,7 @@
         function addMessage(content, role) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
-            
+
             if (role === 'user') {
                 messageDiv.innerHTML = `<div class="message-content"><strong>You:</strong><p>${escapeHtml(content)}</p></div>`;
             } else if (role === 'assistant') {
@@ -123,7 +122,7 @@
             } else {
                 messageDiv.innerHTML = `<div class="message-content error"><p>${escapeHtml(content)}</p></div>`;
             }
-            
+
             chatHistory.appendChild(messageDiv);
             chatHistory.scrollTop = chatHistory.scrollHeight;
         }
@@ -137,50 +136,50 @@
         function formatAnswer(text) {
             // Enhanced markdown to HTML converter
             let html = text;
-            
+
             // Escape HTML first to prevent XSS, but preserve markdown
             html = escapeHtml(html);
-            
+
             // Headers
             html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
             html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
             html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-            
+
             // Bold and italic
             html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            
+
             // Code blocks (triple backticks)
             html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-            
+
             // Inline code (single backticks)
             html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-            
+
             // Links [text](url)
             html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-            
+
             // Numbered lists
             html = html.replace(/^\d+\.\s+(.*)$/gim, '<li>$1</li>');
-            
+
             // Bullet lists
             html = html.replace(/^[-*]\s+(.*)$/gim, '<li>$1</li>');
-            
+
             // Wrap consecutive list items in <ul> or <ol>
-            html = html.replace(/(<li>.*<\/li>\n?)+/g, function(match) {
+            html = html.replace(/(<li>.*<\/li>\n?)+/g, function (match) {
                 // Check if it's a numbered list by looking for numbers
                 const hasNumbers = /^\d+\./.test(match);
                 const listTag = hasNumbers ? 'ol' : 'ul';
                 return '<' + listTag + '>' + match + '</' + listTag + '>';
             });
-            
+
             // Horizontal rules
             html = html.replace(/^---$/gim, '<hr>');
             html = html.replace(/^___$/gim, '<hr>');
-            
+
             // Blockquotes
             html = html.replace(/^>\s+(.*)$/gim, '<blockquote>$1</blockquote>');
-            
+
             // Split into paragraphs (double line breaks)
             let paragraphs = html.split(/\n\n+/);
             html = paragraphs.map(p => {
@@ -192,14 +191,14 @@
                 }
                 return '<p>' + p + '</p>';
             }).join('');
-            
+
             // Single line breaks within paragraphs
             html = html.replace(/(<\/p>)\n(<p>)/g, '$1$2');
             html = html.replace(/\n/g, '<br>');
-            
+
             return html;
         }
     </script>
 </body>
-</html>
 
+</html>
