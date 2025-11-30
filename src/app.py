@@ -7,8 +7,7 @@ app = Flask(__name__)
 # Enable CORS for all routes
 CORS(app)
 
-# Initialize the advisor
-advisor = TYCIslamicFinanceAdvisor()
+# Advisor will be created per request with selected model
 
 
 @app.route('/')
@@ -21,10 +20,19 @@ def ask():
     try:
         data = request.get_json()
         question = data.get('question', '').strip()
+        model = data.get('model', 'gpt-5.1-instant')  # Default to gpt-5.1-instant
 
         if not question:
             return jsonify({'error': 'Please provide a question'}), 400
 
+        # Validate model
+        valid_models = ['gpt-5.1', 'gpt-5.1-instant']
+        if model not in valid_models:
+            model = 'gpt-5.1-instant'  # Fallback to default
+
+        # Create advisor with selected model
+        advisor = TYCIslamicFinanceAdvisor(model=model)
+        
         # Get the answer from the advisor
         # PDF context disabled by default on Render due to memory constraints
         # Set ENABLE_PDF_KNOWLEDGE=true to enable (not recommended on free tier)
