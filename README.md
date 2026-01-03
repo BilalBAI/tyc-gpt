@@ -56,6 +56,7 @@ tyc-gpt/
 - **AI-Powered Advisor**: Answers questions about Islamic finance and Sharia compliance
 - **AAOIFI Standards Integration**: References official AAOIFI Standards when relevant
 - **Modern Web Interface**: Beautiful, responsive chat interface
+- **RESTful API**: Direct API access for integration with other applications
 - **Educational Focus**: Provides clear, structured explanations suitable for beginners and professionals
 
 ## 🔧 Configuration
@@ -87,9 +88,25 @@ See [docs/DEPLOY.md](docs/DEPLOY.md) for detailed deployment instructions to Ren
 
 ## 📖 Documentation
 
+- [API Documentation](docs/API.md) - Complete API reference
 - [Deployment Guide](docs/DEPLOY.md)
 - [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md)
 - [PDF Conversion Guide](docs/README_PDF_CONVERSION.md)
+
+## 🔌 API Usage
+
+The application provides a RESTful API for direct integration:
+
+**Base URL:** `https://your-app-name.onrender.com/api/v1`
+
+**Example Request:**
+```bash
+curl -X POST https://your-app-name.onrender.com/api/v1/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is sukuk?", "model": "gpt-5.1"}'
+```
+
+See [API Documentation](docs/API.md) for complete API reference.
 
 ## 🛠️ Development
 
