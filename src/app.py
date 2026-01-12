@@ -16,7 +16,8 @@ logging.basicConfig(
 )
 
 # Ensure stdout is unbuffered
-sys.stdout.reconfigure(line_buffering=True) if hasattr(sys.stdout, 'reconfigure') else None
+sys.stdout.reconfigure(line_buffering=True) if hasattr(
+    sys.stdout, 'reconfigure') else None
 
 logger = logging.getLogger(__name__)
 
@@ -70,12 +71,12 @@ def _process_question(question, model=None, use_pdf_context=None, temperature=No
 
     # Get the answer from the advisor
     answer = advisor.ask(
-        question, 
+        question,
         use_pdf_context=use_pdf,
         temperature=temperature,
         max_tokens=max_tokens
     )
-    
+
     return answer
 
 
@@ -136,13 +137,13 @@ def api_ask():
     """
     try:
         data = request.get_json()
-        
+
         if not data:
             return jsonify({
                 'success': False,
                 'error': 'Request body must be JSON'
             }), 400
-        
+
         question = data.get('question', '').strip()
         if not question:
             return jsonify({
@@ -156,11 +157,12 @@ def api_ask():
         temperature = data.get('temperature')
         max_tokens = data.get('max_tokens')
 
-        logger.info(f"Processing question: {question[:50]}... | Model: {model} | PDF: {use_pdf_context}")
-        
+        logger.info(
+            f"Processing question: {question[:50]}... | Model: {model} | PDF: {use_pdf_context}")
+
         # Process the question
         answer = _process_question(
-            question, 
+            question,
             model=model,
             use_pdf_context=use_pdf_context,
             temperature=temperature,
@@ -168,7 +170,7 @@ def api_ask():
         )
 
         logger.info(f"Answer generated successfully (length: {len(answer)})")
-        
+
         from datetime import datetime
         return jsonify({
             'success': True,
@@ -177,13 +179,13 @@ def api_ask():
             'model': model,
             'timestamp': datetime.utcnow().isoformat() + 'Z'
         })
-        
+
     except Exception as e:
         # Log error for debugging
         logger.error(f"Error in /api/v1/ask endpoint: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
-        
+
         return jsonify({
             'success': False,
             'error': str(e) if os.getenv('FLASK_ENV') == 'development' else 'An error occurred while processing your question'
@@ -201,7 +203,7 @@ def api_health():
     except Exception as e:
         logger.error(f"Advisor initialization failed: {e}", exc_info=True)
         advisor_status = f'error: {str(e)}'
-    
+
     return jsonify({
         'status': 'healthy',
         'service': 'TYC Islamic Finance Advisor API',
