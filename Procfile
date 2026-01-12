@@ -1,2 +1,2 @@
-web: gunicorn src.app:app
+web: gunicorn src.app:app --log-level info --access-logfile - --error-logfile - --capture-output
 

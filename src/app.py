@@ -179,10 +179,20 @@ def api_ask():
 def api_health():
     """Health check endpoint for API."""
     logger.info("GET /api/v1/health - Health check")
+    try:
+        # Test advisor initialization
+        test_advisor = TYCIslamicFinanceAdvisor(model='gpt-5-mini')
+        advisor_status = 'ok'
+    except Exception as e:
+        logger.error(f"Advisor initialization failed: {e}", exc_info=True)
+        advisor_status = f'error: {str(e)}'
+    
     return jsonify({
         'status': 'healthy',
         'service': 'TYC Islamic Finance Advisor API',
-        'version': '1.0.0'
+        'version': '1.0.0',
+        'advisor': advisor_status,
+        'port': os.environ.get('PORT', 'not set')
     })
 
 
