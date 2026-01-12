@@ -109,7 +109,7 @@ Relevant context from AAOIFI Standards:
 Please use the above AAOIFI Standards context to inform your answer when relevant."""
             except (MemoryError, SystemExit) as e:
                 # Critical errors - disable PDF for future requests
-                print(f"Critical error with PDF: {e}. PDF context disabled.")
+                print(f"Critical error with PDF: {e}. PDF context disabled.", flush=True)
                 # Continue without PDF context
             except Exception as e:
                 # Silently continue without PDF context - app should work without it
