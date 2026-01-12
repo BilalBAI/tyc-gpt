@@ -5,25 +5,36 @@ import os
 import sys
 import logging
 
-# Configure logging
+# Configure logging with immediate flush
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout)
-    ]
+    ],
+    force=True  # Force reconfiguration
 )
 
+# Ensure stdout is unbuffered
+sys.stdout.reconfigure(line_buffering=True) if hasattr(sys.stdout, 'reconfigure') else None
+
 logger = logging.getLogger(__name__)
+
+# Force flush on startup
+print("=" * 50, flush=True)
+print("TYC Islamic Finance Advisor - Starting up", flush=True)
+print("=" * 50, flush=True)
+sys.stdout.flush()
 
 app = Flask(__name__)
 # Enable CORS for all routes
 CORS(app)
 
-# Log startup
+# Log startup with flush
 logger.info("=" * 50)
 logger.info("TYC Islamic Finance Advisor - Starting up")
 logger.info("=" * 50)
+sys.stdout.flush()
 
 # Advisor will be created per request with selected model
 
@@ -73,10 +84,12 @@ def ask():
     """Web frontend endpoint (same as before for backward compatibility)."""
     try:
         logger.info("POST /ask received")
+        sys.stdout.flush()
         data = request.get_json()
         question = data.get('question', '').strip()
         model = data.get('model', 'gpt-5.1')
         logger.info(f"Question: {question[:50]}... | Model: {model}")
+        sys.stdout.flush()
 
         if not question:
             logger.warning("Empty question received")
@@ -84,6 +97,7 @@ def ask():
 
         answer = _process_question(question, model=model)
         logger.info(f"Answer generated successfully (length: {len(answer)})")
+        sys.stdout.flush()
 
         return jsonify({
             'question': question,
@@ -92,6 +106,7 @@ def ask():
     except Exception as e:
         # Log error but return user-friendly message
         logger.error(f"Error in /ask endpoint: {e}", exc_info=True)
+        sys.stdout.flush()
         return jsonify({'error': 'An error occurred while processing your question. Please try again.'}), 500
 
 

@@ -20,7 +20,7 @@ try:
     PDF_AVAILABLE = True
 except ImportError:
     PDF_AVAILABLE = False
-    print("Warning: pdf_knowledge module not available. PDF context will not be included.")
+    print("Warning: pdf_knowledge module not available. PDF context will not be included.", flush=True)
 
 
 class TYCIslamicFinanceAdvisor:

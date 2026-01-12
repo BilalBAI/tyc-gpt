@@ -45,19 +45,19 @@ class PDFKnowledgeBase:
         text_path = Path(self.text_path)
         if text_path.exists():
             try:
-                print(f"Loading from text file: {text_path}")
+                print(f"Loading from text file: {text_path}", flush=True)
                 with open(text_path, 'r', encoding='utf-8') as f:
                     content = f.read()
                 if content.strip():
                     return content
                 else:
-                    print("Text file is empty, falling back to PDF...")
+                    print("Text file is empty, falling back to PDF...", flush=True)
             except Exception as e:
-                print(f"Error reading text file: {e}, falling back to PDF...")
+                print(f"Error reading text file: {e}, falling back to PDF...", flush=True)
 
         # Fallback to PDF parsing
         pdf_path = Path(self.pdf_path)
-        print(f"Loading from PDF: {pdf_path}")
+        print(f"Loading from PDF: {pdf_path}", flush=True)
         return self.load_pdf()
 
     def load_pdf(self) -> str:
@@ -234,22 +234,22 @@ class PDFKnowledgeBase:
         """
         if self.content is None:
             try:
-                print("Loading AAOIFI Standards content...")
+                print("Loading AAOIFI Standards content...", flush=True)
                 self.content = self.load_content()  # Uses text file if available
                 if not self.content:
-                    print("Warning: Content is empty")
+                    print("Warning: Content is empty", flush=True)
                     self.content = ""  # Mark as attempted
                     self.chunks = []
                     return []
                 self.chunks = self.chunk_text(self.content)
             except (MemoryError, SystemExit, KeyboardInterrupt) as e:
                 # Critical errors - mark as failed and don't retry
-                print(f"Critical error loading PDF: {e}")
+                print(f"Critical error loading PDF: {e}", flush=True)
                 self.content = ""  # Mark as attempted to prevent retries
                 self.chunks = []
                 return []
             except Exception as e:
-                print(f"Error loading PDF: {e}")
+                print(f"Error loading PDF: {e}", flush=True)
                 self.content = ""  # Mark as attempted to prevent retries
                 self.chunks = []
                 return []
@@ -340,5 +340,5 @@ def get_aaoifi_context(query: str, max_chars: int = 2000) -> str:
         kb = get_knowledge_base()
         return kb.get_relevant_context(query, max_chars)
     except Exception as e:
-        print(f"Warning: Could not get AAOIFI context: {e}")
+        print(f"Warning: Could not get AAOIFI context: {e}", flush=True)
         return ""  # Return empty string to allow app to continue without PDF
